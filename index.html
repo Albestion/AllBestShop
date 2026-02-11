@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="uk">
 <head>
@@ -44,10 +43,10 @@ th span.arrow { position: absolute; right: 8px; }
 <table>
 <thead>
 <tr>
-<th onclick="sortTable('name')">Назва <span class="arrow"></span></th>
-<th onclick="sortTable('quantity')">Кількість <span class="arrow"></span></th>
-<th onclick="sortTable('price')">Ціна <span class="arrow"></span></th>
-<th onclick="sortTable('sum')">Сума <span class="arrow"></span></th>
+<th data-column="name" onclick="sortTable(this)">Назва <span class="arrow"></span></th>
+<th data-column="quantity" onclick="sortTable(this)">Кількість <span class="arrow"></span></th>
+<th data-column="price" onclick="sortTable(this)">Ціна <span class="arrow"></span></th>
+<th data-column="sum" onclick="sortTable(this)">Сума <span class="arrow"></span></th>
 <th>Дія</th>
 </tr>
 </thead>
@@ -69,22 +68,21 @@ function saveData() {
 }
 
 function renderTable() {
-    let tableBody = document.getElementById("tableBody");
-    tableBody.innerHTML = "";
+    const tbody = document.getElementById("tableBody");
+    tbody.innerHTML = "";
     let totalSum = 0;
 
     products.forEach((product, index) => {
         let sum = product.quantity * product.price;
         totalSum += sum;
-        tableBody.innerHTML += `
+        tbody.innerHTML += `
         <tr>
             <td>${product.name}</td>
             <td>${product.quantity}</td>
             <td>${product.price}</td>
             <td>${sum}</td>
             <td><button class="deleteBtn" onclick="deleteProduct(${index})">Видалити</button></td>
-        </tr>
-        `;
+        </tr>`;
     });
 
     document.getElementById("total").innerText = totalSum;
@@ -118,7 +116,8 @@ function deleteProduct(index) {
     }
 }
 
-function sortTable(column) {
+function sortTable(th) {
+    const column = th.dataset.column;
     if (sortColumn === column) sortAsc = !sortAsc;
     else { sortColumn = column; sortAsc = true; }
 
@@ -142,19 +141,15 @@ function sortTable(column) {
         return 0;
     });
 
-    sortColumn = column;
     renderTable();
 }
 
 function updateArrows() {
     document.querySelectorAll('th span.arrow').forEach(span => span.innerText = '');
     if (!sortColumn) return;
-    const ths = document.querySelectorAll('th');
-    ths.forEach(th => {
-        if (th.innerText.toLowerCase().includes(sortColumn)) {
-            th.querySelector('span.arrow').innerText = sortAsc ? '▲' : '▼';
-        }
-    });
+
+    document.querySelectorAll(`th[data-column="${sortColumn}"] span.arrow`)
+        .forEach(span => span.innerText = sortAsc ? '▲' : '▼');
 }
 
 renderTable();
@@ -162,4 +157,3 @@ renderTable();
 
 </body>
 </html>
-
