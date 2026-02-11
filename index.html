@@ -2,22 +2,11 @@
 <html lang="uk">
 <head>
 <meta charset="UTF-8">
-<title>Облік виготовленої продукції</title>
+<title>Облік продукції</title>
 <style>
-body {
-    font-family: Arial, sans-serif;
-    background: #f4f6f9;
-    padding: 30px;
-}
+body { font-family: Arial, sans-serif; background: #f4f6f9; padding: 30px; }
 h2 { text-align: center; }
-.container {
-    max-width: 900px;
-    margin: auto;
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 12px rgba(0,0,0,0.15);
-}
+.container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 12px rgba(0,0,0,0.15); }
 input { padding: 8px; margin: 5px; width: 150px; }
 button { padding: 8px 12px; cursor: pointer; border: none; border-radius: 4px; color: white; }
 #addBtn { background-color: #2c3e50; }
@@ -37,7 +26,7 @@ th span.arrow { position: absolute; right: 8px; }
 <body>
 
 <div class="container">
-<h2>Облік виготовленої продукції підприємства</h2>
+<h2>Облік виготовленої продукції</h2>
 
 <input type="text" id="name" placeholder="Назва продукції">
 <input type="number" id="quantity" placeholder="Кількість">
@@ -66,7 +55,6 @@ th span.arrow { position: absolute; right: 8px; }
 </div>
 
 <script>
-// Демо-дані на старті
 let products = JSON.parse(localStorage.getItem("products")) || [
     {name: "Товар A", quantity: 5, price: 50},
     {name: "Товар B", quantity: 2, price: 700},
@@ -96,7 +84,6 @@ function renderTable() {
         else if (sum < 1000) rowClass = 'yellow';
         else rowClass = 'green';
 
-        // додаємо клас для підсвічування
         let tr = document.createElement('tr');
         tr.className = rowClass;
         tr.innerHTML = `
@@ -117,10 +104,7 @@ function addProduct() {
     let quantity = parseFloat(document.getElementById("quantity").value);
     let price = parseFloat(document.getElementById("price").value);
 
-    if (!name || quantity <= 0 || price <= 0) {
-        alert("Заповніть всі поля правильно! Кількість та ціна мають бути > 0.");
-        return;
-    }
+    if (!name || quantity <= 0 || price <= 0) return;
 
     products.push({ name, quantity, price });
     saveData();
@@ -132,19 +116,15 @@ function addProduct() {
 }
 
 function deleteProduct(index) {
-    if (confirm("Видалити цей товар?")) {
-        products.splice(index, 1);
-        saveData();
-        renderTable();
-    }
+    products.splice(index, 1);
+    saveData();
+    renderTable();
 }
 
 function clearAll() {
-    if (confirm("Очистити всі дані?")) {
-        products = [];
-        saveData();
-        renderTable();
-    }
+    products = [];
+    saveData();
+    renderTable();
 }
 
 function sortTable(th) {
