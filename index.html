@@ -3,26 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Облік виготовленої продукції</title>
-<style>
-body { font-family: Arial, sans-serif; background: #f4f6f9; padding: 30px; }
-h2 { text-align: center; }
-.container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 12px rgba(0,0,0,0.15); }
-input { padding: 8px; margin: 5px; width: 150px; }
-button { padding: 8px 12px; cursor: pointer; border: none; border-radius: 4px; color: white; }
-#loginBtn, #registerBtn, #addBtn { background-color: #2c3e50; }
-.deleteBtn { background-color: #e74c3c; }
-#clearBtn { background-color: #3498db; margin-left: 10px; }
-#logoutBtn { background-color: #e67e22; float: right; }
-#search { width: 200px; background: #ecf0f1; margin-top: 10px; }
-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-th { background: #2c3e50; color: white; cursor: pointer; position: relative; }
-.total { margin-top: 15px; font-weight: bold; font-size: 1.2em; }
-th span.arrow { position: absolute; right: 8px; }
-.red { background-color: #f8d7da !important; }
-.yellow { background-color: #fff3cd !important; }
-.green { background-color: #d4edda !important; }
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -30,30 +11,30 @@ th span.arrow { position: absolute; right: 8px; }
 <h2>Вхід або реєстрація</h2>
 <input type="text" id="loginUsername" placeholder="Логін">
 <input type="password" id="loginPassword" placeholder="Пароль">
-<button id="loginBtn" onclick="login()">Увійти</button>
-<button id="registerBtn" onclick="register()">Зареєструватися</button>
+<button id="loginBtn">Увійти</button>
+<button id="registerBtn">Зареєструватися</button>
 <p id="loginError" style="color:red;"></p>
 </div>
 
 <div id="productsPage" class="container" style="display:none;">
 <h2>Облік виготовленої продукції</h2>
-<button id="logoutBtn" onclick="logout()">Вийти</button><br><br>
+<button id="logoutBtn">Вийти</button><br><br>
 
 <input type="text" id="name" placeholder="Назва продукції">
 <input type="number" id="quantity" placeholder="Кількість">
 <input type="number" id="price" placeholder="Ціна за одиницю">
-<button id="addBtn" onclick="addProduct()">Додати</button>
-<button id="clearBtn" onclick="clearAll()">Очистити всі дані</button>
+<button id="addBtn">Додати</button>
+<button id="clearBtn">Очистити всі дані</button>
 <br>
-<input type="text" id="search" placeholder="Пошук по назві" oninput="renderTable()">
+<input type="text" id="search" placeholder="Пошук по назві">
 
 <table>
 <thead>
 <tr>
-<th data-column="name" onclick="sortTable(this)">Назва <span class="arrow"></span></th>
-<th data-column="quantity" onclick="sortTable(this)">Кількість <span class="arrow"></span></th>
-<th data-column="price" onclick="sortTable(this)">Ціна <span class="arrow"></span></th>
-<th data-column="sum" onclick="sortTable(this)">Сума <span class="arrow"></span></th>
+<th data-column="name">Назва <span class="arrow"></span></th>
+<th data-column="quantity">Кількість <span class="arrow"></span></th>
+<th data-column="price">Ціна <span class="arrow"></span></th>
+<th data-column="sum">Сума <span class="arrow"></span></th>
 <th>Дія</th>
 </tr>
 </thead>
@@ -65,117 +46,6 @@ th span.arrow { position: absolute; right: 8px; }
 </div>
 </div>
 
-<script>
-let users = JSON.parse(localStorage.getItem("users")) || [
-    {username: "admin", password: "123"}
-];
-
-let products = JSON.parse(localStorage.getItem("products")) || [
-    {name: "Товар A", quantity: 5, price: 50},
-    {name: "Товар B", quantity: 2, price: 700},
-    {name: "Товар C", quantity: 10, price: 120}
-];
-
-let sortColumn = null;
-let sortAsc = true;
-
-function saveUsers() {
-    localStorage.setItem("users", JSON.stringify(users));
-}
-function saveData() {
-    localStorage.setItem("products", JSON.stringify(products));
-}
-
-function login() {
-    const u = document.getElementById("loginUsername").value.trim();
-    const p = document.getElementById("loginPassword").value.trim();
-    const found = users.find(user => user.username===u && user.password===p);
-    if(found){
-        document.getElementById("loginPage").style.display="none";
-        document.getElementById("productsPage").style.display="block";
-        renderTable();
-        document.getElementById("loginError").innerText="";
-    } else {
-        document.getElementById("loginError").innerText="Невірний логін або пароль";
-    }
-}
-
-function register() {
-    const u = document.getElementById("loginUsername").value.trim();
-    const p = document.getElementById("loginPassword").value.trim();
-    if(!u || !p){ document.getElementById("loginError").innerText="Заповніть логін і пароль"; return; }
-    if(users.find(user => user.username===u)){
-        document.getElementById("loginError").innerText="Такий користувач вже існує"; 
-        return;
-    }
-    users.push({username:u, password:p});
-    saveUsers();
-    document.getElementById("loginError").innerText="Користувач створений, увійдіть";
-}
-
-function logout() {
-    document.getElementById("loginPage").style.display="block";
-    document.getElementById("productsPage").style.display="none";
-    document.getElementById("loginUsername").value="";
-    document.getElementById("loginPassword").value="";
-    document.getElementById("loginError").innerText="";
-}
-
-function renderTable() {
-    const tbody = document.getElementById("tableBody");
-    tbody.innerHTML="";
-    let totalSum=0;
-    const searchText=document.getElementById("search").value.toLowerCase();
-    products.forEach((p,i)=>{
-        if(!p.name.toLowerCase().includes(searchText)) return;
-        let sum=p.quantity*p.price;
-        totalSum+=sum;
-        let rowClass=sum<100?'red':sum<1000?'yellow':'green';
-        let tr=document.createElement('tr');
-        tr.className=rowClass;
-        tr.innerHTML=`<td>${p.name}</td><td>${p.quantity}</td><td>${p.price}</td><td>${sum}</td>
-                      <td><button class="deleteBtn" onclick="deleteProduct(${i})">Видалити</button></td>`;
-        tbody.appendChild(tr);
-    });
-    document.getElementById("total").innerText=totalSum;
-    updateArrows();
-}
-
-function addProduct() {
-    let name=document.getElementById("name").value.trim();
-    let quantity=parseFloat(document.getElementById("quantity").value);
-    let price=parseFloat(document.getElementById("price").value);
-    if(!name || quantity<=0 || price<=0) return;
-    products.push({name,quantity,price});
-    saveData();
-    renderTable();
-    document.getElementById("name").value="";
-    document.getElementById("quantity").value="";
-    document.getElementById("price").value="";
-}
-
-function deleteProduct(i){ products.splice(i,1); saveData(); renderTable(); }
-function clearAll(){ products=[]; saveData(); renderTable(); }
-
-function sortTable(th){
-    const c=th.dataset.column;
-    if(sortColumn===c) sortAsc=!sortAsc;
-    else {sortColumn=c; sortAsc=true;}
-    products.sort((a,b)=>{
-        let valA=c==='sum'?a.quantity*a.price:a[c];
-        let valB=c==='sum'?b.quantity*b.price:b[c];
-        if(typeof valA==='string'){ valA=valA.toLowerCase(); valB=valB.toLowerCase(); }
-        return (valA>valB?1:-1)*(sortAsc?1:-1);
-    });
-    renderTable();
-}
-
-function updateArrows(){
-    document.querySelectorAll('th span.arrow').forEach(s=>s.innerText='');
-    if(!sortColumn) return;
-    document.querySelectorAll(`th[data-column="${sortColumn}"] span.arrow`).forEach(s=>s.innerText=sortAsc?'▲':'▼');
-}
-</script>
-
+<script src="script.js"></script>
 </body>
 </html>
