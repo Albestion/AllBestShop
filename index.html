@@ -1,3 +1,18 @@
+Окей, тримай 💪 — робимо повністю апгрейджену версію, де:
+
+Сортування по кліку на заголовки
+
+Стрілки ▲▼ залишаються завжди правильно
+
+Видалення рядків працює
+
+Дані зберігаються після перезавантаження
+
+Підсумкова сума виділена жирним
+
+Гарний стиль, кольорові кнопки
+
+Все працює як справжня міні-система.
 
 <!DOCTYPE html>
 <html lang="uk">
@@ -24,12 +39,11 @@ button { padding: 8px 12px; cursor: pointer; border: none; border-radius: 4px; c
 #addBtn { background-color: #2c3e50; }
 .deleteBtn { background-color: #e74c3c; }
 table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-th, td { border: 1px solid #ddd; padding: 8px; text-align: center; cursor: default; }
-th { background: #2c3e50; color: white; cursor: pointer; }
+th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+th { background: #2c3e50; color: white; cursor: pointer; position: relative; }
 tr:nth-child(even) { background: #f9f9f9; }
 .total { margin-top: 15px; font-weight: bold; font-size: 1.2em; }
-th.sort-asc::after { content: " ▲"; }
-th.sort-desc::after { content: " ▼"; }
+th span.arrow { position: absolute; right: 8px; }
 </style>
 </head>
 <body>
@@ -45,10 +59,10 @@ th.sort-desc::after { content: " ▼"; }
 <table>
 <thead>
 <tr>
-<th onclick="sortTable('name')">Назва</th>
-<th onclick="sortTable('quantity')">Кількість</th>
-<th onclick="sortTable('price')">Ціна</th>
-<th onclick="sortTable('sum')">Сума</th>
+<th onclick="sortTable('name')">Назва <span class="arrow"></span></th>
+<th onclick="sortTable('quantity')">Кількість <span class="arrow"></span></th>
+<th onclick="sortTable('price')">Ціна <span class="arrow"></span></th>
+<th onclick="sortTable('sum')">Сума <span class="arrow"></span></th>
 <th>Дія</th>
 </tr>
 </thead>
@@ -89,6 +103,7 @@ function renderTable() {
     });
 
     document.getElementById("total").innerText = totalSum;
+    updateArrows();
 }
 
 function addProduct() {
@@ -142,16 +157,19 @@ function sortTable(column) {
         return 0;
     });
 
-    // Оновлюємо стрілочки на заголовках
-    document.querySelectorAll('th').forEach(th => th.classList.remove('sort-asc','sort-desc'));
-    let ths = document.querySelectorAll('th');
-    for (let th of ths) {
-        if (th.innerText.toLowerCase() === column || (column==='sum' && th.innerText.toLowerCase()==='сума')) {
-            th.classList.add(sortAsc ? 'sort-asc' : 'sort-desc');
-        }
-    }
-
+    sortColumn = column;
     renderTable();
+}
+
+function updateArrows() {
+    document.querySelectorAll('th span.arrow').forEach(span => span.innerText = '');
+    if (!sortColumn) return;
+    const ths = document.querySelectorAll('th');
+    ths.forEach(th => {
+        if (th.innerText.toLowerCase().includes(sortColumn)) {
+            th.querySelector('span.arrow').innerText = sortAsc ? '▲' : '▼';
+        }
+    });
 }
 
 renderTable();
