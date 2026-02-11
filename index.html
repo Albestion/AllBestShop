@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<title>Облік виготовленої продукції</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f6f9;
+    padding: 30px;
+}
+
+h2 {
+    text-align: center;
+}
+
+.container {
+    max-width: 800px;
+    margin: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+input {
+    padding: 8px;
+    margin: 5px;
+}
+
+button {
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+
+th {
+    background: #2c3e50;
+    color: white;
+}
+
+.total {
+    margin-top: 15px;
+    font-weight: bold;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+<h2>Облік виготовленої продукції підприємства</h2>
+
+<input type="text" id="name" placeholder="Назва продукції">
+<input type="number" id="quantity" placeholder="Кількість">
+<input type="number" id="price" placeholder="Ціна за одиницю">
+<button onclick="addProduct()">Додати</button>
+
+<table>
+<thead>
+<tr>
+<th>Назва</th>
+<th>Кількість</th>
+<th>Ціна</th>
+<th>Сума</th>
+<th>Дія</th>
+</tr>
+</thead>
+<tbody id="tableBody"></tbody>
+</table>
+
+<div class="total">
+Загальна сума: <span id="total">0</span> грн
+</div>
+</div>
+
+<script>
+let products = JSON.parse(localStorage.getItem("products")) || [];
+
+function saveData() {
+    localStorage.setItem("products", JSON.stringify(products));
+}
+
+function renderTable() {
+    let tableBody = document.getElementById("tableBody");
+    tableBody.innerHTML = "";
+    let totalSum = 0;
+
+    products.forEach((product, index) => {
+        let sum = product.quantity * product.price;
+        totalSum += sum;
+
+        tableBody.innerHTML += `
+        <tr>
+            <td>${product.name}</td>
+            <td>${product.quantity}</td>
+            <td>${product.price}</td>
+            <td>${sum}</td>
+            <td><button onclick="deleteProduct(${index})">Видалити</button></td>
+        </tr>
+        `;
+    });
+
+    document.getElementById("total").innerText = totalSum;
+}
+
+function addProduct() {
+    let name = document.getElementById("name").value;
+    let quantity = parseFloat(document.getElementById("quantity").value);
+    let price = parseFloat(document.getElementById("price").value);
+
+    if (!name || quantity <= 0 || price <= 0) {
+        alert("Заповніть всі поля правильно!");
+        return;
+    }
+
+    products.push({ name, quantity, price });
+    saveData();
+    renderTable();
+
+    document.getElementById("name").value = "";
+    document.getElementById("quantity").value = "";
+    document.getElementById("price").value = "";
+}
+
+function deleteProduct(index) {
+    products.splice(index, 1);
+    saveData();
+    renderTable();
+}
+
+renderTable();
+</script>
+
+</body>
+</html>
