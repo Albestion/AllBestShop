@@ -2,15 +2,14 @@
 <html lang="uk">
 <head>
 <meta charset="UTF-8">
-<title>Облік продукції</title>
+<title>Облік виготовленої продукції</title>
 <style>
 body { font-family: Arial, sans-serif; background: #f4f6f9; padding: 30px; }
 h2 { text-align: center; }
 .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 12px rgba(0,0,0,0.15); }
 input { padding: 8px; margin: 5px; width: 150px; }
 button { padding: 8px 12px; cursor: pointer; border: none; border-radius: 4px; color: white; }
-#loginBtn { background-color: #2c3e50; }
-#addBtn { background-color: #2c3e50; }
+#loginBtn, #registerBtn, #addBtn { background-color: #2c3e50; }
 .deleteBtn { background-color: #e74c3c; }
 #clearBtn { background-color: #3498db; margin-left: 10px; }
 #logoutBtn { background-color: #e67e22; float: right; }
@@ -28,10 +27,11 @@ th span.arrow { position: absolute; right: 8px; }
 <body>
 
 <div id="loginPage" class="container">
-<h2>Вхід у систему</h2>
+<h2>Вхід або реєстрація</h2>
 <input type="text" id="loginUsername" placeholder="Логін">
 <input type="password" id="loginPassword" placeholder="Пароль">
 <button id="loginBtn" onclick="login()">Увійти</button>
+<button id="registerBtn" onclick="register()">Зареєструватися</button>
 <p id="loginError" style="color:red;"></p>
 </div>
 
@@ -66,9 +66,8 @@ th span.arrow { position: absolute; right: 8px; }
 </div>
 
 <script>
-let users = [
-    {username: "admin", password: "123"},
-    {username: "user", password: "456"}
+let users = JSON.parse(localStorage.getItem("users")) || [
+    {username: "admin", password: "123"}
 ];
 
 let products = JSON.parse(localStorage.getItem("products")) || [
@@ -80,98 +79,102 @@ let products = JSON.parse(localStorage.getItem("products")) || [
 let sortColumn = null;
 let sortAsc = true;
 
-function login() {
-    const u = document.getElementById("loginUsername").value.trim();
-    const p = document.getElementById("loginPassword").value.trim();
-    const found = users.find(user => user.username === u && user.password === p);
-    if(found){
-        document.getElementById("loginPage").style.display = "none";
-        document.getElementById("productsPage").style.display = "block";
-        renderTable();
-    } else {
-        document.getElementById("loginError").innerText = "Невірний логін або пароль";
-    }
+function saveUsers() {
+    localStorage.setItem("users", JSON.stringify(users));
 }
-
-function logout() {
-    document.getElementById("loginPage").style.display = "block";
-    document.getElementById("productsPage").style.display = "none";
-    document.getElementById("loginUsername").value = "";
-    document.getElementById("loginPassword").value = "";
-    document.getElementById("loginError").innerText = "";
-}
-
 function saveData() {
     localStorage.setItem("products", JSON.stringify(products));
 }
 
+function login() {
+    const u = document.getElementById("loginUsername").value.trim();
+    const p = document.getElementById("loginPassword").value.trim();
+    const found = users.find(user => user.username===u && user.password===p);
+    if(found){
+        document.getElementById("loginPage").style.display="none";
+        document.getElementById("productsPage").style.display="block";
+        renderTable();
+        document.getElementById("loginError").innerText="";
+    } else {
+        document.getElementById("loginError").innerText="Невірний логін або пароль";
+    }
+}
+
+function register() {
+    const u = document.getElementById("loginUsername").value.trim();
+    const p = document.getElementById("loginPassword").value.trim();
+    if(!u || !p){ document.getElementById("loginError").innerText="Заповніть логін і пароль"; return; }
+    if(users.find(user => user.username===u)){
+        document.getElementById("loginError").innerText="Такий користувач вже існує"; 
+        return;
+    }
+    users.push({username:u, password:p});
+    saveUsers();
+    document.getElementById("loginError").innerText="Користувач створений, увійдіть";
+}
+
+function logout() {
+    document.getElementById("loginPage").style.display="block";
+    document.getElementById("productsPage").style.display="none";
+    document.getElementById("loginUsername").value="";
+    document.getElementById("loginPassword").value="";
+    document.getElementById("loginError").innerText="";
+}
+
 function renderTable() {
     const tbody = document.getElementById("tableBody");
-    tbody.innerHTML = "";
-    let totalSum = 0;
-    const searchText = document.getElementById("search").value.toLowerCase();
-    products.forEach((product, index) => {
-        if(!product.name.toLowerCase().includes(searchText)) return;
-        let sum = product.quantity * product.price;
-        totalSum += sum;
-        let rowClass = sum < 100 ? 'red' : sum < 1000 ? 'yellow' : 'green';
-        let tr = document.createElement('tr');
-        tr.className = rowClass;
-        tr.innerHTML = `<td>${product.name}</td>
-                        <td>${product.quantity}</td>
-                        <td>${product.price}</td>
-                        <td>${sum}</td>
-                        <td><button class="deleteBtn" onclick="deleteProduct(${index})">Видалити</button></td>`;
+    tbody.innerHTML="";
+    let totalSum=0;
+    const searchText=document.getElementById("search").value.toLowerCase();
+    products.forEach((p,i)=>{
+        if(!p.name.toLowerCase().includes(searchText)) return;
+        let sum=p.quantity*p.price;
+        totalSum+=sum;
+        let rowClass=sum<100?'red':sum<1000?'yellow':'green';
+        let tr=document.createElement('tr');
+        tr.className=rowClass;
+        tr.innerHTML=`<td>${p.name}</td><td>${p.quantity}</td><td>${p.price}</td><td>${sum}</td>
+                      <td><button class="deleteBtn" onclick="deleteProduct(${i})">Видалити</button></td>`;
         tbody.appendChild(tr);
     });
-    document.getElementById("total").innerText = totalSum;
+    document.getElementById("total").innerText=totalSum;
     updateArrows();
 }
 
 function addProduct() {
-    let name = document.getElementById("name").value.trim();
-    let quantity = parseFloat(document.getElementById("quantity").value);
-    let price = parseFloat(document.getElementById("price").value);
+    let name=document.getElementById("name").value.trim();
+    let quantity=parseFloat(document.getElementById("quantity").value);
+    let price=parseFloat(document.getElementById("price").value);
     if(!name || quantity<=0 || price<=0) return;
-    products.push({name, quantity, price});
+    products.push({name,quantity,price});
     saveData();
     renderTable();
-    document.getElementById("name").value = "";
-    document.getElementById("quantity").value = "";
-    document.getElementById("price").value = "";
+    document.getElementById("name").value="";
+    document.getElementById("quantity").value="";
+    document.getElementById("price").value="";
 }
 
-function deleteProduct(index) {
-    products.splice(index,1);
-    saveData();
-    renderTable();
-}
+function deleteProduct(i){ products.splice(i,1); saveData(); renderTable(); }
+function clearAll(){ products=[]; saveData(); renderTable(); }
 
-function clearAll() {
-    products=[];
-    saveData();
-    renderTable();
-}
-
-function sortTable(th) {
-    const column = th.dataset.column;
-    if(sortColumn===column) sortAsc=!sortAsc;
-    else {sortColumn=column; sortAsc=true;}
+function sortTable(th){
+    const c=th.dataset.column;
+    if(sortColumn===c) sortAsc=!sortAsc;
+    else {sortColumn=c; sortAsc=true;}
     products.sort((a,b)=>{
-        let valA = column==='sum'?a.quantity*a.price:a[column];
-        let valB = column==='sum'?b.quantity*b.price:b[column];
-        if(typeof valA==='string'){valA=valA.toLowerCase(); valB=valB.toLowerCase();}
+        let valA=c==='sum'?a.quantity*a.price:a[c];
+        let valB=c==='sum'?b.quantity*b.price:b[c];
+        if(typeof valA==='string'){ valA=valA.toLowerCase(); valB=valB.toLowerCase(); }
         return (valA>valB?1:-1)*(sortAsc?1:-1);
     });
     renderTable();
 }
 
-function updateArrows() {
+function updateArrows(){
     document.querySelectorAll('th span.arrow').forEach(s=>s.innerText='');
     if(!sortColumn) return;
     document.querySelectorAll(`th[data-column="${sortColumn}"] span.arrow`).forEach(s=>s.innerText=sortAsc?'▲':'▼');
 }
-
 </script>
 
 </body>
