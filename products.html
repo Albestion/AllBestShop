@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<title>Облік продукції</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="container">
+<h2>Облік виготовленої продукції</h2>
+<button id="accountBtn">Мій акаунт</button>
+<button id="logoutBtn">Вийти</button><br><br>
+
+<input type="text" id="name" placeholder="Назва продукції">
+<input type="number" id="quantity" placeholder="Кількість">
+<input type="number" id="price" placeholder="Ціна за одиницю">
+<button id="addBtn">Додати</button>
+<button id="clearBtn">Очистити всі дані</button>
+<br>
+<input type="text" id="search" placeholder="Пошук по назві">
+
+<table>
+<thead>
+<tr>
+<th data-column="name">Назва <span class="arrow"></span></th>
+<th data-column="quantity">Кількість <span class="arrow"></span></th>
+<th data-column="price">Ціна <span class="arrow"></span></th>
+<th data-column="sum">Сума <span class="arrow"></span></th>
+<th>Дія</th>
+</tr>
+</thead>
+<tbody id="tableBody"></tbody>
+</table>
+
+<div class="total">
+Загальна сума: <span id="total">0</span> грн
+</div>
+</div>
+
+<script src="js/script.js"></script>
+<script>
+document.getElementById("logoutBtn").onclick=logout;
+document.getElementById("addBtn").onclick=addProduct;
+document.getElementById("clearBtn").onclick=clearAll;
+document.getElementById("search").oninput=renderTable;
+document.getElementById("accountBtn").onclick=()=>window.location="account.html";
+document.querySelectorAll("th[data-column]").forEach(th=>th.onclick=()=>sortTable(th));
+
+if(!localStorage.getItem("currentUser")) window.location="index.html";
+
+renderTable();
+</script>
+</body>
+</html>
