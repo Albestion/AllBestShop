@@ -2,12 +2,12 @@
 <html lang="uk">
 <head>
 <meta charset="UTF-8">
-<title>Облік виготовленої продукції</title>
-<link rel="stylesheet" href="style.css">
+<title>Вхід</title>
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<div id="loginPage" class="container">
+<div class="container">
 <h2>Вхід або реєстрація</h2>
 <input type="text" id="loginUsername" placeholder="Логін">
 <input type="password" id="loginPassword" placeholder="Пароль">
@@ -16,36 +16,31 @@
 <p id="loginError" style="color:red;"></p>
 </div>
 
-<div id="productsPage" class="container" style="display:none;">
-<h2>Облік виготовленої продукції</h2>
-<button id="logoutBtn">Вийти</button><br><br>
+<script src="js/script.js"></script>
+<script>
+document.getElementById("loginBtn").onclick=loginIndex;
+document.getElementById("registerBtn").onclick=registerIndex;
 
-<input type="text" id="name" placeholder="Назва продукції">
-<input type="number" id="quantity" placeholder="Кількість">
-<input type="number" id="price" placeholder="Ціна за одиницю">
-<button id="addBtn">Додати</button>
-<button id="clearBtn">Очистити всі дані</button>
-<br>
-<input type="text" id="search" placeholder="Пошук по назві">
+function loginIndex(){
+    const u=document.getElementById("loginUsername").value.trim();
+    const p=document.getElementById("loginPassword").value.trim();
+    const f=users.find(user=>user.username===u && user.password===p);
+    if(f){ 
+        localStorage.setItem("currentUser", u); 
+        window.location="products.html"; 
+    }
+    else document.getElementById("loginError").innerText="Невірний логін або пароль";
+}
 
-<table>
-<thead>
-<tr>
-<th data-column="name">Назва <span class="arrow"></span></th>
-<th data-column="quantity">Кількість <span class="arrow"></span></th>
-<th data-column="price">Ціна <span class="arrow"></span></th>
-<th data-column="sum">Сума <span class="arrow"></span></th>
-<th>Дія</th>
-</tr>
-</thead>
-<tbody id="tableBody"></tbody>
-</table>
-
-<div class="total">
-Загальна сума: <span id="total">0</span> грн
-</div>
-</div>
-
-<script src="script.js"></script>
+function registerIndex(){
+    const u=document.getElementById("loginUsername").value.trim();
+    const p=document.getElementById("loginPassword").value.trim();
+    if(!u||!p){ document.getElementById("loginError").innerText="Заповніть логін і пароль"; return; }
+    if(users.find(user=>user.username===u)){ document.getElementById("loginError").innerText="Користувач вже існує"; return; }
+    users.push({username:u,password:p});
+    saveUsers();
+    document.getElementById("loginError").innerText="Користувач створений, увійдіть";
+}
+</script>
 </body>
 </html>
