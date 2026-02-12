@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<title>Мій акаунт</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="container">
+<h2>Мій акаунт</h2>
+<p>Логін: <span id="currentLogin"></span></p>
+<input type="password" id="newPassword" placeholder="Новий пароль">
+<button id="changeBtn">Змінити пароль</button><br><br>
+<button onclick="window.location='products.html'">Назад до продукції</button>
+<button onclick="logout()">Вийти</button>
+<p id="accountMsg" style="color:green;"></p>
+</div>
+
+<script src="js/script.js"></script>
+<script>
+const login = localStorage.getItem("currentUser");
+if(!login) window.location="index.html";
+document.getElementById("currentLogin").innerText=login;
+
+document.getElementById("changeBtn").onclick=()=>{
+    const p=document.getElementById("newPassword").value.trim();
+    if(!p) return;
+    const u=users.find(u=>u.username===login);
+    u.password=p;
+    saveUsers();
+    document.getElementById("accountMsg").innerText="Пароль змінено";
+    document.getElementById("newPassword").value="";
+};
+</script>
+</body>
+</html>
