@@ -7,51 +7,17 @@ let products = JSON.parse(localStorage.getItem("products")) || [
 
 let sortColumn=null, sortAsc=true;
 
-document.getElementById("loginBtn").onclick=login;
-document.getElementById("registerBtn").onclick=register;
-document.getElementById("logoutBtn").onclick=logout;
-document.getElementById("addBtn").onclick=addProduct;
-document.getElementById("clearBtn").onclick=clearAll;
-document.getElementById("search").oninput=renderTable;
-document.querySelectorAll("th[data-column]").forEach(th=>th.onclick=()=>sortTable(th));
-
 function saveUsers(){ localStorage.setItem("users", JSON.stringify(users)); }
 function saveData(){ localStorage.setItem("products", JSON.stringify(products)); }
 
-function login(){
-    const u=document.getElementById("loginUsername").value.trim();
-    const p=document.getElementById("loginPassword").value.trim();
-    const f=users.find(user=>user.username===u && user.password===p);
-    if(f){ showProducts(); document.getElementById("loginError").innerText=""; }
-    else document.getElementById("loginError").innerText="Невірний логін або пароль";
-}
-
-function register(){
-    const u=document.getElementById("loginUsername").value.trim();
-    const p=document.getElementById("loginPassword").value.trim();
-    if(!u||!p){ document.getElementById("loginError").innerText="Заповніть логін і пароль"; return; }
-    if(users.find(user=>user.username===u)){ document.getElementById("loginError").innerText="Такий користувач вже існує"; return; }
-    users.push({username:u,password:p});
-    saveUsers();
-    document.getElementById("loginError").innerText="Користувач створений, увійдіть";
-}
-
 function logout(){ 
-    document.getElementById("loginPage").style.display="block";
-    document.getElementById("productsPage").style.display="none";
-    document.getElementById("loginUsername").value="";
-    document.getElementById("loginPassword").value="";
-    document.getElementById("loginError").innerText="";
-}
-
-function showProducts(){
-    document.getElementById("loginPage").style.display="none";
-    document.getElementById("productsPage").style.display="block";
-    renderTable();
+    localStorage.removeItem("currentUser");
+    window.location="index.html";
 }
 
 function renderTable(){
     const tbody=document.getElementById("tableBody");
+    if(!tbody) return;
     tbody.innerHTML="";
     let total=0;
     const s=document.getElementById("search").value.toLowerCase();
@@ -64,7 +30,8 @@ function renderTable(){
         <td><button class="deleteBtn" onclick="deleteProduct(${i})">Видалити</button></td>`;
         tbody.appendChild(tr);
     });
-    document.getElementById("total").innerText=total;
+    const totalEl=document.getElementById("total");
+    if(totalEl) totalEl.innerText=total;
     updateArrows();
 }
 
